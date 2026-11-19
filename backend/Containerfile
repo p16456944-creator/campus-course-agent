@@ -9,13 +9,16 @@ ENV TZ=Asia/Shanghai
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制后端所有代码
+# 拷贝所有代码
 COPY . .
 
-# 赋予启动脚本执行权限
+# 【关键修复 1】强制将 start.sh 里的 CRLF 替换为 LF，去除隐藏的 \r 字符
+RUN sed -i 's/\r$//' start.sh
+
+# 【关键修复 2】赋予执行权限
 RUN chmod +x start.sh
 
 EXPOSE 8000
 
-# 运行启动脚本
-CMD ["./start.sh"]
+# 【关键修复 3】直接用 sh 来运行，不依赖可执行权限，双保险
+CMD ["sh", "start.sh"]
