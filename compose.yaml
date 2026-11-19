@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  # 1. MySQL 数据库
+  db:
+    image: docker.io/library/mysql:8.0
+    container_name: campus_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: campus_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # 自动导入你的 SQL 脚本
+      - ./sql/backend.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  # 2. 后端 (FastAPI + Agent + MCP)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    container_name: campus_backend
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    # 读取后端目录下的环境变量文件
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+
+  # 3. 前端 (Vue3 + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Containerfile
+    container_name: campus_frontend
+    restart: on-failure
+    depends_on:
+      - backend
+    ports:
+      - "8080:80" # 浏览器访问 http://localhost:8080
+
+volumes:
+  mysql_data:

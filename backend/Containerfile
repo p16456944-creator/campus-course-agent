@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Shanghai
+
+# 复制依赖文件并安装
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 复制后端所有代码
+COPY . .
+
+# 赋予启动脚本执行权限
+RUN chmod +x start.sh
+
+EXPOSE 8000
+
+# 运行启动脚本
+CMD ["./start.sh"]
