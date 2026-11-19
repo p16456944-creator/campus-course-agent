@@ -69,6 +69,11 @@ DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxxx
 
 请确保电脑已安装 **Podman** 和 **podman-compose**。
 
+需要先进入到项目根目录：
+```bash
+cd campus-course-agent
+```
+
 在项目根目录打开终端，执行：
 
 ```bash
